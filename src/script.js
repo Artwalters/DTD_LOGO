@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js'
 import { GroundedSkybox } from 'three/addons/objects/GroundedSkybox.js'
+import Stats from 'stats.js'
 
 /**
  * Loaders
@@ -21,6 +22,25 @@ const textureLoader = new THREE.TextureLoader()
 // Debug
 const gui = new GUI()
 const global = {}
+
+// Stats (FPS counter)
+const stats = new Stats()
+stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
+
+// Geometry info display
+const geometryInfo = document.createElement('div')
+geometryInfo.style.position = 'absolute'
+geometryInfo.style.top = '48px'
+geometryInfo.style.left = '0px'
+geometryInfo.style.color = '#00ff00'
+geometryInfo.style.backgroundColor = 'rgba(0,0,0,0.8)'
+geometryInfo.style.padding = '5px 8px'
+geometryInfo.style.fontFamily = 'Helvetica, Arial, sans-serif'
+geometryInfo.style.fontSize = '9px'
+geometryInfo.style.fontWeight = 'bold'
+geometryInfo.innerHTML = 'Triangles: 0 | Vertices: 0'
+document.body.appendChild(geometryInfo)
 
 /**
  * Mouse
@@ -164,6 +184,25 @@ gltfLoader.load(
 
         // Store model globally for mouse interaction
         global.butterfly = gltf.scene
+
+        // Calculate geometry info
+        let totalTriangles = 0
+        let totalVertices = 0
+        gltf.scene.traverse((child) => {
+            if (child.isMesh) {
+                const geometry = child.geometry
+                if (geometry.index) {
+                    totalTriangles += geometry.index.count / 3
+                } else {
+                    totalTriangles += geometry.attributes.position.count / 3
+                }
+                totalVertices += geometry.attributes.position.count
+            }
+        })
+
+        // Update geometry info display
+        geometryInfo.innerHTML = `Triangles: ${Math.round(totalTriangles).toLocaleString()} | Vertices: ${totalVertices.toLocaleString()}`
+        console.log('Geometry info:', { triangles: Math.round(totalTriangles), vertices: totalVertices })
 
         // Debug: Check animations
         console.log('Animations found:', gltf.animations.length)
@@ -336,6 +375,9 @@ const cameraPost = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, -1000, 100
 const clock = new THREE.Clock()
 const tick = () =>
 {
+    // Stats begin
+    stats.begin()
+
     // Time
     const deltaTime = clock.getDelta()
     const elapsedTime = clock.getElapsedTime()
@@ -381,6 +423,9 @@ const tick = () =>
     // Second pass: Render post-processing to screen
     renderer.setRenderTarget(null)
     renderer.render(scenePost, cameraPost)
+
+    // Stats end
+    stats.end()
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
