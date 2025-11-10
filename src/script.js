@@ -60,7 +60,7 @@ const scene = new THREE.Scene()
 /**
  * Environment map
  */
-scene.environmentIntensity = 1.253
+scene.environmentIntensity = 4
 scene.backgroundBlurriness = 0
 scene.backgroundIntensity = 1
 scene.backgroundRotation.y = 0
@@ -182,8 +182,39 @@ gltfLoader.load(
         gltf.scene.position.y = 4
         scene.add(gltf.scene)
 
+        // Adjust material properties for more glossy appearance
+        gltf.scene.traverse((child) => {
+            if (child.isMesh && child.material) {
+                child.material.roughness = 0.1  // Lower roughness = more glossy (0 = mirror, 1 = matte)
+                child.material.metalness = 0.8  // Higher metalness = more metallic shine
+                child.material.needsUpdate = true
+            }
+        })
+
         // Store model globally for mouse interaction
         global.butterfly = gltf.scene
+
+        // Add GUI controls for material properties
+        const materialSettings = {
+            roughness: 0.1,
+            metalness: 0.8
+        }
+
+        const materialFolder = gui.addFolder('Material')
+        materialFolder.add(materialSettings, 'roughness', 0, 1, 0.01).onChange((value) => {
+            gltf.scene.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    child.material.roughness = value
+                }
+            })
+        })
+        materialFolder.add(materialSettings, 'metalness', 0, 1, 0.01).onChange((value) => {
+            gltf.scene.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    child.material.metalness = value
+                }
+            })
+        })
 
         // Calculate geometry info
         let totalTriangles = 0
