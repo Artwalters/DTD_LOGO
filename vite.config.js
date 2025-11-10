@@ -1,7 +1,7 @@
 import restart from 'vite-plugin-restart'
 
 export default {
-    base: '/DTD_animatie/', // Base path for GitHub Pages
+    base: process.env.NODE_ENV === 'production' ? '/DTD_animatie/' : '/',
     root: 'src/', // Sources files (typically where index.html is)
     publicDir: '../static/', // Path from "root" to static assets (files that are served as they are)
     server:
