@@ -276,10 +276,11 @@ window.addEventListener('resize', () =>
 
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3))
+    const newPixelRatio = Math.min(window.devicePixelRatio, 3)
+    renderer.setPixelRatio(newPixelRatio)
 
-    // Update render target
-    baseTexture.setSize(sizes.width, sizes.height)
+    // Update render target with pixel ratio for high-DPI displays
+    baseTexture.setSize(sizes.width * newPixelRatio, sizes.height * newPixelRatio)
 })
 
 /**
@@ -325,11 +326,16 @@ scene.add(ambientLight)
  * Post-processing with Render Target
  */
 // Render target for the main scene
-const baseTexture = new THREE.WebGLRenderTarget(sizes.width, sizes.height, {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.LinearFilter,
-    format: THREE.RGBAFormat
-})
+const pixelRatio = Math.min(window.devicePixelRatio, 3)
+const baseTexture = new THREE.WebGLRenderTarget(
+    sizes.width * pixelRatio,
+    sizes.height * pixelRatio,
+    {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat
+    }
+)
 
 // Vertex shader for post-processing (passthrough)
 const postVertexShader = `
