@@ -91,7 +91,7 @@ gui.add(scene.environmentRotation, 'y').min(0).max(Math.PI * 2).step(0.001).name
 // scene.environment = environmentMap
 
 // Ground projected skybox
-rgbeLoader.load('/environmentMaps/2/studio_small_09_1k.hdr', (environmentMap) =>
+rgbeLoader.load('environmentMaps/2/studio_small_09_1k.hdr', (environmentMap) =>
 {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping
 
@@ -155,7 +155,7 @@ rgbeLoader.load('/environmentMaps/2/studio_small_09_1k.hdr', (environmentMap) =>
  * Models
  */
 gltfLoader.load(
-    '/models/logobutterfly.glb',
+    'models/logobutterfly.glb',
     (gltf) =>
     {
         gltf.scene.scale.set(2.5, 2.5, 2.5)
